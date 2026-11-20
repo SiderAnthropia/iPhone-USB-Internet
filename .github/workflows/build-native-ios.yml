@@ -1,0 +1,33 @@
+name: Build native USB iPhone app
+on:
+  workflow_dispatch:
+  push:
+    branches: [native-iphone-app]
+    paths: ['ios/**', '.github/workflows/build-native-ios.yml']
+permissions:
+  contents: read
+concurrency:
+  group: native-ios-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  iphone:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Test relay, build IPA and preview
+        run: bash ios/scripts/build.sh
+      - name: Upload IPA and validation
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: iPhone-USB-Internet-native-${{ github.run_number }}
+          path: |
+            ios/build/*.ipa
+            ios/build/*.txt
+            ios/build/*.log
+            ios/build/preview.png
+          if-no-files-found: error
+          retention-days: 14
