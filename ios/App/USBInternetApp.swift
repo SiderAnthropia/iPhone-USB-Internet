@@ -30,8 +30,8 @@ final class RelayModel: ObservableObject {
     @Published var running = false
     @Published var pairing = false
     @Published var request: PairingRequest?
-    @Published var status = "Ready when you are"
-    @Published var detail = "Connect your iPhone to Windows with a USB data cable."
+    @Published var status = PairingKey.read() == nil ? "Pair your PC" : "Ready when you are"
+    @Published var detail = PairingKey.read() == nil ? "Connect your iPhone to Windows with a USB data cable, then pair below." : "Connect your iPhone to Windows with a USB data cable."
     @Published var stats = RelayStats()
     @Published var keepAwake = true { didSet { updateAwake() } }
     private var relay: RelayServer?
@@ -88,7 +88,7 @@ final class RelayModel: ObservableObject {
     }
     func updateAwake() { UIApplication.shared.isIdleTimerDisabled = keepAwake && (running || pairing) }
     static func bytes(_ count: UInt64) -> String {
-        ByteCountFormatter.string(fromByteCount: Int64(min(count, UInt64(Int64.max))), countStyle: .decimal)
+        count == 0 ? "0 B" : ByteCountFormatter.string(fromByteCount: Int64(min(count, UInt64(Int64.max))), countStyle: .decimal)
     }
 }
 
@@ -126,11 +126,15 @@ struct ContentView: View {
                             .font(.caption.weight(.semibold)).foregroundStyle(accent)
                         Text(model.status).font(.largeTitle.bold())
                         Text(model.detail).font(.subheadline).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                        Button { model.running || model.pairing ? model.stop() : model.start() } label: {
-                            Label(model.running ? "Stop sharing" : model.pairing ? "Cancel pairing" : "Start sharing", systemImage: model.running || model.pairing ? "stop.fill" : "power")
+                        Button {
+                            if model.running || model.pairing { model.stop() }
+                            else if model.paired { model.start() }
+                            else { model.beginPairing() }
+                        } label: {
+                            Label(model.running ? "Stop sharing" : model.pairing ? "Cancel pairing" : model.paired ? "Start sharing" : "Pair with PC", systemImage: model.running || model.pairing ? "stop.fill" : model.paired ? "power" : "link")
                                 .font(.headline).frame(maxWidth: .infinity).padding(.vertical, 10)
                         }.buttonStyle(.borderedProminent).tint(accent).foregroundStyle(.black)
-                            .disabled(!model.paired && !model.pairing)
+                            .accessibilityIdentifier("primary-action")
                     }.padding(22).background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 24))
                     HStack(spacing: 12) {
                         metric("Downloaded", RelayModel.bytes(model.stats.download), "arrow.down")
