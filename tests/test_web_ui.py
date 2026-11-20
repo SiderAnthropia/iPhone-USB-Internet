@@ -196,18 +196,18 @@ class WebUITests(unittest.TestCase):
         controller.set_status('error', error)
         self.assertEqual(controller.detail_message, error)
         self.assertNotIn('error_detail', bridge.get_state())
-        self.assertEqual(bridge.get_state()['message']['text'], 'Could not check the phone. Keep it unlocked with iSH open, then try again.')
+        self.assertEqual(bridge.get_state()['message']['text'], 'Could not check the phone. Keep it unlocked with USB Internet sharing, then try again.')
 
     def test_missing_phone_has_one_simple_message(self):
         _, bridge, controller = self.make_controller()
-        controller.set_status('error', 'Phone check did not pass: Connect exactly one iPhone by USB, unlock it, and tap Trust. If already paired here, reconnect that same iPhone.\nKeep the paired phone unlocked with iSH running. PC internet is unchanged.')
+        controller.set_status('error', 'Phone check did not pass: Connect exactly one iPhone by USB, unlock it, and tap Trust. If already paired here, reconnect that same iPhone.\nKeep USB Internet open and sharing on the unlocked phone. PC internet is unchanged.')
         self.assertEqual(bridge.get_state()['message']['text'], 'Connect your paired iPhone by USB, unlock it, and tap Trust if asked.')
         self.assertNotIn('error_detail', bridge.get_state())
         self.assertIsNone(bridge.get_state()['notice'])
 
     def test_other_errors_keep_the_actual_cause(self):
         _, bridge, controller = self.make_controller()
-        controller.set_status('error', 'Phone check did not pass: Authentication failed.\nKeep the paired phone unlocked with iSH running. PC internet is unchanged.')
+        controller.set_status('error', 'Phone check did not pass: Authentication failed.\nKeep USB Internet open and sharing on the unlocked phone. PC internet is unchanged.')
         self.assertEqual(bridge.get_state()['message']['text'], 'Authentication failed.')
         controller.set_status('cleanup-needed', 'Restart Windows before reconnecting.')
         self.assertEqual(bridge.get_state()['message']['text'], 'Restart Windows before reconnecting.')

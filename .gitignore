@@ -20,3 +20,8 @@ node_modules/
 .env
 .env.*
 .publish-staging/
+
+.build/
+.swiftpm/
+*.xcodeproj/
+*.ipa

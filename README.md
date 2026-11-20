@@ -1,91 +1,33 @@
-<img src="src/assets/iphone-usb.png" width="80" alt="iPhone USB Internet app icon">
+# iPhone USB Internet 2.0.0 preview
 
-# iPhone USB Internet
+A Windows app and native iPhone companion for carrying PC internet traffic through the phone's cellular connection over USB. Made by **Zuyis**.
 
-Connect your Windows PC through your iPhone over USB, with connection controls and diagnostics in one place.
+The native app replaces iSH and Python for daily use. Install its IPA through Sideloadly, pair over USB, then **Start sharing → Check phone → Connect PC**.
 
-Made by **Zuyis**. iPhone USB Internet pairs a Windows desktop app with an
-[iSH](https://ish.app) relay on your iPhone. Prepare your phone, check the
-connection, then connect when you choose: **pair → check → connect**.
+## Install
 
-**[Download iPhone USB Internet 1.2.0 for Windows](https://github.com/dukagjina/iPhone-USB-Internet/releases/download/v1.2.0/iPhone-USB-Internet-Setup.exe)**
+See [INSTALL.md](INSTALL.md). Requires Windows 10/11 x64, WebView2, Apple device support, iOS 16+, Sideloadly and a USB data cable.
 
-[Release notes & checksums](https://github.com/dukagjina/iPhone-USB-Internet/releases/tag/v1.2.0) ·
-[Installation help](INSTALL.md) ·
-[Report a problem](https://github.com/dukagjina/iPhone-USB-Internet/issues/new)
+1. Install the Windows setup EXE and sign/install the unsigned IPA through Sideloadly.
+2. Close iSH. In **USB Internet** on the phone, tap **Pair with PC**.
+3. In Windows **Setup & maintenance**, choose **Pair native iPhone app**. Compare the six-digit code and approve on the phone.
+4. Keep cellular on, Wi-Fi and Personal Hotspot off. Tap **Start sharing** on the phone.
+5. Choose **Check phone**, then **Connect PC** in Windows and approve its administrator prompt.
 
-**Requirements:** Windows 10/11 x64, WebView2, Apple device support, an iPhone
-with iSH and Python, and a USB data cable. Keep iSH visible and the phone
-unlocked while connected. Version **1.2.0** is an **experimental prerelease**;
-the installer is **unsigned**. See [installation help](INSTALL.md).
+## Behavior
 
-**Educational Purposes Only.** Carrier billing and hotspot classification are
-unverified. Follow your carrier agreement and applicable laws. Read the
-[educational-use notice](EDUCATIONAL%20USE.txt).
+The native relay provides authenticated TCP/UDP through a loopback-only USB endpoint. It uses Apple's Network framework, requests cellular for outgoing connections, and permits public internet destinations. Windows retains its virtual adapter, SOCKS gateway, diagnostics, manual connection and route cleanup.
 
-## Screenshots
+The native relay advertises 128 sessions; Windows reserves 16 for checks and uses up to 112 data sessions. Pending handshakes, DNS work, UDP flows and buffers are bounded. This is a conservative initial capacity, not a speed benchmark. Legacy iSH recovery remains under an advanced disclosure.
 
-The dashboard and diagnostics in **1.2.0**. These screenshots use invented
-demonstration values, with no personal phone identifiers or pairing data.
-Select an image to view it at full size.
+**Keep the iPhone app visible and the phone unlocked.** The app stops sharing when backgrounded and can prevent automatic screen sleep while active. Reopen it, tap Start sharing and reconnect after leaving it.
 
-**Connection dashboard**
+This is not a VPN or kill switch. Other Windows connections can remain available. Some games, VPNs and interface-bound apps may not work. Physical iPhone USB, cellular throughput, reconnect and live route-restoration qualification remain required. This unsigned build is an experimental preview.
 
-[![Connection dashboard — connection controls, traffic totals, active sessions and phone setup](docs/connection.png)](docs/connection.png)
+## Development
 
-<details>
-<summary><strong>Connection diagnostics</strong> — queues, failed requests and session observations</summary>
+Windows checks and packaging: [docs/BUILD.md](docs/BUILD.md). Native source and tests: `ios/`. On macOS with Xcode, run `bash ios/scripts/build.sh`. The workflow `.github/workflows/build-native-ios.yml` produces an unsigned IPA, simulator preview and validation logs. Sideloadly signs locally; no signing credentials belong in the repository.
 
-[![Connection diagnostics — queue counts, USB response, internet checks and session observations](docs/diagnostics.png)](docs/diagnostics.png)
+Windows pairing uses DPAPI; the iPhone key uses Keychain. A pairing window opens only on request, expires after two minutes, and requires approval on the phone. No browsing-history log or telemetry is implemented.
 
-</details>
-
-## What you can do
-
-| Area | Tools |
-| --- | --- |
-| Connection | Check your phone, connect manually and disconnect from one dashboard. Opening the app never connects. |
-| Traffic & sessions | See downloaded and uploaded totals, active sessions and the 384-session limit. |
-| Connection health | Check USB relay response, phone internet availability and session capacity. |
-| Diagnostics | Inspect waiting, rejected and failed requests, plus peak session counts and recent health checks. |
-| Setup & maintenance | Pair your iPhone, prepare its receiver command and send the phone relay over USB. |
-| Desktop app | Use Start menu and Desktop shortcuts, a saved window position and a standard Windows uninstaller. |
-
-This is not a VPN or kill switch. Other enabled connections can still be used;
-some apps, games and VPNs need separate compatibility testing. See
-[connection behavior and limits](INSTALL.md#connection-behavior-and-limits).
-
-## Get started
-
-1. Download **iPhone-USB-Internet-Setup.exe** using the link above and install it.
-2. Install Apple Devices on Windows and iSH Shell on your iPhone. In iSH, run `apk add python3`.
-3. Open **Setup & maintenance** in the app to pair your phone and send the relay. Follow the [first-time setup guide](INSTALL.md#first-time-phone-setup).
-4. Run `python3 /root/phone_network.py` in iSH. Keep cellular on, Wi-Fi and Personal Hotspot off, and wait for **PHONE NETWORK READY**.
-5. Choose **Check phone**, then **Connect PC**, and approve Windows permission when you are ready.
-
-Setup installs for your Windows account. Uninstall through **Windows Settings →
-Apps → Installed apps → iPhone USB Internet**. Local pairing and preferences
-are retained for reinstallation; see [installation help](INSTALL.md#uninstall).
-
-## Privacy, support and license
-
-No telemetry or browsing-history database is implemented. Windows pairing data
-is encrypted for your account; local diagnostics contain session counters and
-errors. The phone internet health check contacts Cloudflare. Read the full
-[privacy notice](PRIVACY.txt).
-
-For ordinary problems, [open an issue](https://github.com/dukagjina/iPhone-USB-Internet/issues/new)
-with your app version, Windows version and the visible error. Do not post
-pairing files, receiver commands or the installed phone relay; they contain
-private credentials.
-
-Free for personal and other permitted noncommercial use under the
-[PolyForm Noncommercial License 1.0.0](LICENSE). Commercial use requires
-separate permission from Zuyis; see [commercial-use terms](COMMERCIAL_USE.txt).
-[Third-party notices](THIRD%20PARTY%20NOTICES.txt) and
-[trademark terms](TRADEMARKS.txt) apply. This independent project is not
-affiliated with Apple, Microsoft, iSH or any carrier.
-
-The repository includes the application source and build tools. See
-[developing and building](docs/BUILD.md) to work on the project. To install the
-app, download the **EXE asset**; the source ZIP is for development.
+Educational Purposes Only. Carrier billing and hotspot classification are unverified. Read [EDUCATIONAL USE.txt](EDUCATIONAL%20USE.txt), [PRIVACY.txt](PRIVACY.txt) and [LICENSE](LICENSE). PolyForm Noncommercial 1.0.0; commercial use requires permission from Zuyis. Independent of Apple, Microsoft, Sideloadly, iSH and carriers.

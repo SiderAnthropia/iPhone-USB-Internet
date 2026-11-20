@@ -1,5 +1,5 @@
 #define MyAppName "iPhone USB Internet"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "2.0.0"
 #ifndef PayloadDir
   #define PayloadDir "dist\iPhone USB Internet"
 #endif
@@ -12,7 +12,7 @@ AppId={{5B72F4AF-F916-4C37-A641-F10DE2F0324D}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher=Zuyis
-VersionInfoVersion=1.2.0.0
+VersionInfoVersion=2.0.0.0
 VersionInfoCompany=Zuyis
 VersionInfoDescription=iPhone USB Internet Windows installer
 VersionInfoProductName={#MyAppName}

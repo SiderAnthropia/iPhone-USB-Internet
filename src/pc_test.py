@@ -83,8 +83,8 @@ def connect_phone(config, port):
         "DeviceID": device["DeviceID"], "PortNumber": socket.htons(port)})
     if response.get("Number") != 0:
         connection.close()
-        raise RuntimeError("iPhone refused the test port. Keep iSH open and run the "
-                           "phone command for this step. Apple code: " + str(response.get("Number")))
+        raise RuntimeError("iPhone refused the test port. Open USB Internet on your iPhone and start the "
+                           "relay, or tap Pair with PC for pairing. Apple code: " + str(response.get("Number")))
     connection.settimeout(20)
     return connection
 

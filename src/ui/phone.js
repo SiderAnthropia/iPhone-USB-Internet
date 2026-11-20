@@ -37,7 +37,7 @@ function renderDiagnostics(d={}, state='stopped') {
   const pressure=fresh&&(d.waiting>0||(d.capacity>0&&d.active>=d.capacity*.85));
   setText('capacity-state',!connected?'Not in use':!fresh?'Unknown':d.waiting>0?'Requests waiting':pressure?'High usage':'Available');
   $('capacity-state').className=pressure?'warning':fresh?'good':'';
-  setText('capacity-detail',fresh?count(d.active)+' active · '+count(d.waiting)+' waiting':connected?'Waiting for current counters':'Up to 384 sessions');
+  setText('capacity-detail',fresh?count(d.active)+' active · '+count(d.waiting)+' waiting':connected?'Waiting for current counters':'Negotiated with phone');
 }
 
 function render(state) {
@@ -53,11 +53,11 @@ function render(state) {
   $('power').disabled = sending || button.state === 'disabled';
   $('power').classList.toggle('connected', button.style === 'Stop.TButton');
   const app=state.app||{};
-  document.querySelectorAll('.app-version').forEach(el=>{el.textContent=app.version||'1.2.0';});
+  document.querySelectorAll('.app-version').forEach(el=>{el.textContent=app.version||'2.0.0';});
   $('pair_phone').disabled=sending||!app.can_pair;
-  $('pair_phone').hidden=app.paired===true;
-  setText('pairing-status',app.paired?'Paired':app.paired===false?'Not paired':'Checking pairing…');
-  setText('pairing-note',app.paired?'Your existing pairing is kept. Use the receiver below only when installing or updating the phone relay.':'A private pairing key stays encrypted for this Windows account.');
+  $('pair_phone').hidden=false;
+  setText('pairing-status',app.paired?'PC key saved':app.paired===false?'Not paired':'Checking pairing…');
+  setText('pairing-note',app.paired?'Your Windows key is saved. Use Pair native iPhone app to enroll it on the phone; Check phone verifies the link.':'A private pairing key stays encrypted for this Windows account.');
   if(app.paired===false && connectionState==='stopped') setText('power-text','Set up phone');
   $('power').dataset.needsPairing=String(app.paired===false);
   const maintenance = state.maintenance || {};

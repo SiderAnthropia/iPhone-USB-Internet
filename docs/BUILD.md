@@ -81,3 +81,11 @@ installed phone relay containing a private key.
 Keep the installer and source assets for each published version matched to its
 release commit. Documentation on the main branch may be newer than a tagged
 release; a documentation change alone does not require reinstalling the app.
+
+## Native iPhone app
+
+On macOS with Xcode: `bash ios/scripts/build.sh`. The script runs Swift tests, a real socket protocol suite, builds an unsigned device IPA, then builds/launches the simulator and captures a preview. XcodeGen is installed through Homebrew if missing. See `.github/workflows/build-native-ios.yml`.
+
+The harness permits loopback fixtures only when explicitly launched with its test flag. The iPhone target includes only the core library, uses the public-destination policy, and requires cellular for outbound connections. No Network Extension or background-mode entitlement is requested.
+
+Sign the resulting IPA in Sideloadly locally. Protocol and simulator checks do not replace physical USB/cellular tests. The native relay has 128 slots (112 for Windows data after the health reserve). The old iSH recovery path is retained in an advanced disclosure.

@@ -6,8 +6,10 @@ launching the updated app preserves that encrypted pairing in per-user data
 only if no pairing already exists there. It never silently replaces a key.
 
 Pairing uses Windows DPAPI for the current Windows account. It is not safe to
-publish just because it is encrypted. On the phone, the private relay script
-contains its authentication key. Do not share that script or its backup.
+publish just because it is encrypted. The native iPhone app keeps its authentication key in iOS Keychain, available
+only while unlocked. Pairing opens a loopback USB listener for two minutes
+and requires matching-code approval on the phone. Legacy iSH scripts still
+contain their key; do not share those scripts or backups.
 Other software running as you or as administrator is not isolated by this app.
 
 No telemetry or browsing-history database is implemented. Local session state

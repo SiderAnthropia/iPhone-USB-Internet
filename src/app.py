@@ -96,7 +96,7 @@ class App:
                 self.events.put(('ready', b.check_phone()))
             except Exception as error:
                 self.events.put(('error', 'Phone check did not pass: ' + b.error_detail(error) +
-                                 '\nKeep the paired phone unlocked with iSH running. PC internet is unchanged.'))
+                                 '\nKeep USB Internet open and sharing on the unlocked phone. PC internet is unchanged.'))
         threading.Thread(target=run, daemon=True).start()
 
     def connect(self):

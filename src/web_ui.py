@@ -16,6 +16,7 @@ import phone_upgrade
 import credential_cleanup
 import presentation
 import pairing
+import native_pair
 import app_info
 from app import App
 
@@ -124,12 +125,12 @@ class Controller(App):
         # One message beside the primary action; retain the original internally.
         if state == 'error' and message.startswith('Phone check did not pass: '):
             message = message.removeprefix('Phone check did not pass: ').removesuffix(
-                '\nKeep the paired phone unlocked with iSH running. PC internet is unchanged.')
+                '\nKeep USB Internet open and sharing on the unlocked phone. PC internet is unchanged.')
             if message == ('Connect exactly one iPhone by USB, unlock it, and tap Trust. '
                            'If already paired here, reconnect that same iPhone.'):
                 message = 'Connect your paired iPhone by USB, unlock it, and tap Trust if asked.'
             elif len(message) > 400:
-                message = 'Could not check the phone. Keep it unlocked with iSH open, then try again.'
+                message = 'Could not check the phone. Keep it unlocked with USB Internet sharing, then try again.'
         self.message.configure(text=message)
         with self.bridge._lock:
             self.bridge._state['connection_state'] = state
@@ -157,18 +158,21 @@ class Controller(App):
                 can_copy=bool(self._receiver), can_retire=free and self.check_passed)
             if 'app' in self.bridge._state:
                 paired = pairing.path(b.ROOT, b.DATA).exists()
-                self.bridge._state['app'].update(paired=paired, can_pair=free and not paired)
+                self.bridge._state['app'].update(paired=paired, can_pair=free)
 
     def pair_phone(self):
         if not self._maintenance_allowed('update_result'):
             return
-        self.busy = True
+        self.busy, self.check_passed = True, False
+        self.set_status('stopped', 'Pairing the native iPhone app. Check phone again after pairing.')
         self.update_buttons()
         self._maintenance_result('update_result', 'Finding your USB-connected iPhone…')
         def create():
             try:
-                pairing.create(b.ROOT, b.DATA)
-                result = 'Pairing saved for this Windows account. Prepare the receiver command below.'
+                config = pairing.create(b.ROOT, b.DATA)
+                self._maintenance_result('update_result',
+                    'Compare code ' + native_pair.code(config) + ' on your iPhone, then tap Approve there. Waiting up to two minutes…')
+                result = native_pair.enroll(config)
             except Exception as error:
                 result = 'Pairing could not finish: ' + b.error_detail(error)
             self._pair_replies.put(result)

@@ -66,7 +66,7 @@ def phone_info(config):
     connection, result = legacy.operation(config, 'ping')
     connection.close()
     if result.get('version') != 3 or 'async-relay' not in result.get('capabilities', []):
-        raise RuntimeError('The phone needs an update. Open Phone update after disconnecting the old app.')
+        raise RuntimeError('Start sharing in the updated iPhone USB Internet app, then check again.')
     limit = result.get('max_sessions')
     if type(limit) is not int or limit < 32:
         raise RuntimeError('Phone capacity is insufficient for this build.')

@@ -19,8 +19,8 @@ ROOT_FILES = (
     'TRADEMARKS.txt', 'RELEASE CHECKLIST.txt', 'requirements-build.txt',
     'installer.iss', 'package.json',
 )
-SOURCE_DIRS = ('src', 'tests', 'tools', 'docs', 'licenses')
-SUFFIXES = {'.py', '.ps1', '.cjs', '.js', '.html', '.css', '.svg', '.png', '.ico', '.txt', '.md'}
+SOURCE_DIRS = ('src', 'tests', 'tools', 'docs', 'licenses', 'ios', '.github')
+SUFFIXES = {'.py', '.ps1', '.cjs', '.js', '.html', '.css', '.svg', '.png', '.ico', '.txt', '.md', '.swift', '.json', '.yml', '.sh', '.plist'}
 PERSONAL_PATH = re.compile(rb'(?i)[a-z]:[\\/]+Users[\\/]+|' + rb'/' + rb'Users/[^/\s]+/')
 
 
@@ -35,7 +35,7 @@ def public_files():
         for path in directory.rglob('*'):
             if path.is_symlink():
                 raise SystemExit('Symlink is not allowed in source: ' + str(path.relative_to(ROOT)))
-            if path.is_file() and '__pycache__' not in path.parts:
+            if path.is_file() and not any(part in ('__pycache__', '.build', 'build', 'iPhoneUSBInternet.xcodeproj', '.swiftpm') for part in path.relative_to(ROOT).parts):
                 if path.suffix.lower() not in SUFFIXES:
                     raise SystemExit('Unexpected file in source: ' + str(path.relative_to(ROOT)))
                 files.append(path)
