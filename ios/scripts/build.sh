@@ -27,3 +27,7 @@ xcrun simctl install "$device" build/Simulator/Build/Products/Debug-iphonesimula
 xcrun simctl launch "$device" io.zuyis.iphoneusbinternet
 sleep 4
 xcrun simctl io "$device" screenshot build/preview.png
+
+xcodebuild -project iPhoneUSBInternet.xcodeproj -scheme iPhoneUSBInternet -configuration Debug \
+  -destination "id=$device" -derivedDataPath build/Simulator CODE_SIGNING_ALLOWED=NO \
+  -parallel-testing-enabled NO test 2>&1 | tee build/phone-ui-tests.log

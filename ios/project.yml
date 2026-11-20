@@ -29,6 +29,17 @@ targets:
     dependencies:
       - package: USBRelayCore
         product: USBRelayCore
+  USBInternetUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.zuyis.iphoneusbinternet.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: iPhoneUSBInternet
+    dependencies:
+      - target: iPhoneUSBInternet
 schemes:
   iPhoneUSBInternet:
     build:
@@ -36,3 +47,5 @@ schemes:
         iPhoneUSBInternet: all
     run:
       config: Debug
+    test:
+      targets: [USBInternetUITests]
