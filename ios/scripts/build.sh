@@ -19,7 +19,7 @@ ditto "$app" build/package/Payload/iPhoneUSBInternet.app
 (cd build && shasum -a 256 iPhone-USB-Internet-unsigned.ipa > SHA256SUMS.txt)
 xcodebuild -project iPhoneUSBInternet.xcodeproj -scheme iPhoneUSBInternet -configuration Debug \
   -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build/Simulator \
-  CODE_SIGNING_ALLOWED=NO build 2>&1 | tee build/simulator-build.log
+  CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- build 2>&1 | tee build/simulator-build.log
 device=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for v in d["devices"].values() for x in v if x["name"].startswith("iPhone")))')
 xcrun simctl boot "$device" || true
 xcrun simctl bootstatus "$device" -b
@@ -29,5 +29,5 @@ sleep 4
 xcrun simctl io "$device" screenshot build/preview.png
 
 xcodebuild -project iPhoneUSBInternet.xcodeproj -scheme iPhoneUSBInternet -configuration Debug \
-  -destination "id=$device" -derivedDataPath build/Simulator CODE_SIGNING_ALLOWED=NO \
+  -destination "id=$device" -derivedDataPath build/Simulator CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- \
   -parallel-testing-enabled NO test 2>&1 | tee build/phone-ui-tests.log

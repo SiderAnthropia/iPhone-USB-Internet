@@ -4,6 +4,7 @@ import USBRelayCore
 
 enum PairingKey {
     static let service = "io.zuyis.iphone-usb-internet.pairing"
+    static var lastError: OSStatus?
     static func read() -> String? {
         let query: [String: Any] = [kSecClass as String:kSecClassGenericPassword,
             kSecAttrService as String:service, kSecAttrAccount as String:"pc",
@@ -14,14 +15,16 @@ enum PairingKey {
         return token
     }
     static func save(_ token: String) -> Bool {
+        lastError = nil
         guard Wire.validToken(token) else { return false }
         let query: [String: Any] = [kSecClass as String:kSecClassGenericPassword,
             kSecAttrService as String:service, kSecAttrAccount as String:"pc"]
         let attributes: [String: Any] = [kSecValueData as String:Data(token.utf8),
             kSecAttrAccessible as String:kSecAttrAccessibleWhenUnlockedThisDeviceOnly]
         let status = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
-        if status == errSecItemNotFound { return SecItemAdd(query.merging(attributes) { _, new in new } as CFDictionary, nil) == errSecSuccess }
-        return status == errSecSuccess
+        let result = status == errSecItemNotFound ? SecItemAdd(query.merging(attributes) { _, new in new } as CFDictionary, nil) : status
+        if result != errSecSuccess { lastError = result }
+        return result == errSecSuccess
     }
 }
 
@@ -79,7 +82,8 @@ final class RelayModel: ObservableObject {
             guard let self else { return }
             self.pairing = false; self.paired = PairingKey.read() != nil
             self.status = success ? "Paired with PC" : "Pairing ended"
-            self.detail = message; self.pairServer = nil; self.updateAwake()
+            self.detail = !success && PairingKey.lastError != nil ? "The app could not save pairing in Keychain (\(PairingKey.lastError!)). Re-sign it in Sideloadly, then pair again." : message
+            self.pairServer = nil; self.updateAwake()
         }
         updateAwake(); server.start()
     }
