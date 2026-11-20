@@ -117,7 +117,7 @@ final class Channel {
     }
     func send(_ data: Data, final: Bool = false, _ done: @escaping (Bool) -> Void) {
         guard !ended else { done(false); return }
-        connection.send(content: data, contentContext: final ? .finalMessage : .defaultMessage,
+        connection.send(content: final && data.isEmpty ? nil : data, contentContext: final ? .finalMessage : .defaultMessage,
                         isComplete: true, completion: .contentProcessed { done($0 == nil) })
     }
     func json(_ value: [String: Any], _ done: @escaping (Bool) -> Void) {

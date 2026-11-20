@@ -7,6 +7,7 @@ let allowLoopback = args.contains("--allow-loopback")
 let relay = RelayServer(token: token, cellular: false,
                         validator: { PublicInternet.allows($0) || (allowLoopback && $0 == "127.0.0.1") })
 relay.onState = { state in print(state); fflush(stdout) }
+relay.onDiagnostic = { message in print(message); fflush(stdout) }
 relay.start()
 let pairing = PairingServer()
 pairing.onRequest = { request in

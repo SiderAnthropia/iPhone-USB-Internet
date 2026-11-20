@@ -19,7 +19,7 @@ def exact(s, n):
     b = b''
     while len(b) < n:
         p = s.recv(n-len(b))
-        if not p: raise EOFError()
+        if not p: raise EOFError(f'Received {len(b)} of {n} expected bytes')
         b += p
     return b
 

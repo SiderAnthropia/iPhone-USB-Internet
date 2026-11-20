@@ -27,6 +27,7 @@ public final class RelayServer {
     var running = false
     public var onState: ((String) -> Void)?
     public var onStats: ((RelayStats) -> Void)?
+    public var onDiagnostic: ((String) -> Void)?
 
     public init(token: String, port: UInt16 = 18766, cellular: Bool = true,
                 validator: @escaping (String) -> Bool = PublicInternet.allows) {
@@ -130,7 +131,7 @@ final class RelaySession {
     func start() {
         client.connection.stateUpdateHandler = { [weak self] state in
             guard let self else { return }
-            if case .failed = state { self.close() }
+            if case .failed(let error) = state { self.server.onDiagnostic?("Client failed: \(error)"); self.close() }
         }
         client.connection.start(queue: server.queue)
         client.readFrame(limit: 4096) { [weak self] data in
@@ -180,7 +181,8 @@ final class RelaySession {
                     self.pump(self.client, channel, upload: true)
                     self.pump(channel, self.client, upload: false)
                 }
-            case .failed:
+            case .failed(let error):
+                self.server.onDiagnostic?("Remote failed: \(error)")
                 if decided { self.close() } else { failed() }
             default: break
             }
@@ -193,12 +195,12 @@ final class RelaySession {
         guard !closed else { return }
         source.connection.receive(minimumIncompleteLength: 1, maximumLength: 32768) { [weak self] data, _, complete, error in
             guard let self, !self.closed else { return }
-            guard error == nil else { self.close(); return }
+            guard error == nil else { self.server.onDiagnostic?("Read error upload=\(upload): \(String(describing: error))"); self.close(); return }
             let bytes = data ?? Data()
             destination.send(bytes, final: complete) { ok in
-                guard ok, !self.closed else { self.close(); return }
+                guard ok, !self.closed else { self.server.onDiagnostic?("Write failed upload=\(upload), final=\(complete), size=\(bytes.count)"); self.close(); return }
                 if upload { self.server.stats.upload += UInt64(bytes.count) } else { self.server.stats.download += UInt64(bytes.count) }
-                if complete { self.halfClosed += 1 }
+                if complete { self.halfClosed += 1; self.server.onDiagnostic?("EOF upload=\(upload) sent=\(self.server.stats.upload) received=\(self.server.stats.download)") }
                 self.touch()
                 if self.halfClosed == 2 { self.close() }
                 else if !complete { self.pump(source, destination, upload: upload) }
