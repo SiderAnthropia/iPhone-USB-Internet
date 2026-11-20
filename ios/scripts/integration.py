@@ -11,6 +11,8 @@ import subprocess
 import threading
 import time
 import unittest
+from unittest.mock import patch
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 TOKEN = 'a' * 64
@@ -96,6 +98,27 @@ class ProtocolTests(unittest.TestCase):
             r=json.loads(receive(s)); self.assertTrue(r['ok']); self.assertEqual(r['service'],'native-ios')
             expected=f'{int.from_bytes(hashlib.sha256(TOKEN.encode()).digest()[:4],"big")%1000000:06d}'
             self.assertEqual(r['code'],expected)
+
+    def test_08_existing_windows_gateway(self):
+        sys.path.insert(0, str(ROOT.parent/'src'))
+        import gateway
+        import pc_gateway
+        def usb(config, port): return socket.create_connection(('127.0.0.1',port),timeout=8)
+        with patch.object(pc_gateway.usb, 'connect_phone', side_effect=usb):
+            service=gateway.Gateway({'token':TOKEN},'fixture-password',limit=112)
+            thread=threading.Thread(target=service.serve_forever,daemon=True);thread.start()
+            try:
+                s,_=pc_gateway.socks_connect(service.server_address,'fixture-password',1,'127.0.0.1',tcp.server_address[1])
+                with s:
+                    s.sendall(b'native gateway');self.assertEqual(exact(s,14),b'native gateway')
+                control,bound=pc_gateway.socks_connect(service.server_address,'fixture-password',3,'0.0.0.0',0)
+                with control, socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as udp:
+                    udp.settimeout(8)
+                    packet=b'\0\0\0\1'+socket.inet_aton('127.0.0.1')+struct.pack('!H',udp1.server_address[1])+b'DNS fixture'
+                    udp.sendto(packet,bound);self.assertEqual(udp.recv(65536),packet)
+                self.assertGreater(service.snapshot()['upload'],0)
+            finally:
+                service.stop();thread.join(3)
 
 if __name__ == '__main__':
     tcp=TCPServer(('127.0.0.1',0),Echo); udp1=socketserver.UDPServer(('127.0.0.1',0),UDP); udp2=socketserver.UDPServer(('127.0.0.1',0),UDP)
